@@ -2,9 +2,13 @@
 import rospy
 import tf
 from gazebo_msgs.msg import LinkStates
+import sys, rospy, tf, rospkg
+from gazebo_msgs.srv import *
+from geometry_msgs.msg import *
+from copy import deepcopy
 
 # This is hard-coded to block for this exercise, yet you can make the script general by adding cmd line arguments
-input_linkname = "block"
+input_linkname = 'r7'
 
 # Global variable where the object's pose is stored
 pose = None
