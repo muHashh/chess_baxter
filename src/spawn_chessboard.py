@@ -18,7 +18,7 @@ if __name__ == '__main__':
     with open(model_path + "cafe_table/model.sdf", "r") as table_file:
         table_xml = table_file.read().replace('\n', '')
 
-    table_pose=Pose(position=Point(x=1.0, y=0.0, z=0.0))
+    table_pose=Pose(position=Point(x=0.73, y=0.4, z=0.0))
     try:
         spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
         spawn_sdf("cafe_table", table_xml, "/", table_pose, "world")
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     # ChessBoard
     orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
-    board_pose = Pose(Point(0.6,0.25,0.78), orient)
+    board_pose = Pose(Point(0.3,0.55,0.78), orient)
     frame_dist = 0.025
     model_path = rospkg.RosPack().get_path('chess_baxter')+"/models/"
     
@@ -39,8 +39,9 @@ if __name__ == '__main__':
     print srv_call("chessboard", board_xml, "", board_pose, "world")
 
     # Add chesspieces into the simulation
-    origin_piece = 0.03125
+    origin_piece = 0.05
 
+    
     pieces_xml = dict()
     list_pieces = 'rnbqkpRNBQKP'
     for each in list_pieces:
@@ -63,6 +64,11 @@ if __name__ == '__main__':
             piece_positionmap[str(row)+str(col)] = [pose.position.x, pose.position.y, pose.position.z-0.93] #0.93 to compensate Gazebo RViz origin difference
             if piece in list_pieces:
                 piece_names.append("%s%d" % (piece,col))
+                try:
+                    spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
+                    spawn_sdf(piece + str(col), pieces_xml.get(piece), "/", pose, "world")
+                except rospy.ServiceException, e:
+                    rospy.logerr("Spawn SDF service call failed: {0}".format(e))
 
     rospy.set_param('board_setup', board_setup) # Board setup
     rospy.set_param('list_pieces', list_pieces) # List of unique pieces
