@@ -170,7 +170,7 @@ def main():
     # Load Gazebo Models via Spawning Services
     # Note that the models reference is the /world frame
     # and the IK operates with respect to the /base frame
-    load_gazebo_models()
+    #load_gazebo_models()
     # Remove models from the scene on shutdown
     rospy.on_shutdown(delete_gazebo_models)
 
