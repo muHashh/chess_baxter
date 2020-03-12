@@ -58,8 +58,8 @@ if __name__ == '__main__':
         # print row
         for col, piece in enumerate(each):
             pose = deepcopy(board_pose)
-            pose.position.x = board_pose.position.x + frame_dist + origin_piece + row * (2 * origin_piece)
-            pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + col * (2 * origin_piece)
+            pose.position.x = board_pose.position.x + frame_dist + origin_piece + row * (1 * origin_piece)
+            pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + col * (1 * origin_piece)
             pose.position.z += 0.018
             piece_positionmap[str(row)+str(col)] = [pose.position.x, pose.position.y, pose.position.z-0.93] #0.93 to compensate Gazebo RViz origin difference
             if piece in list_pieces:
