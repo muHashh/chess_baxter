@@ -178,7 +178,6 @@ def main():
     rospy.wait_for_message("/robot/sim/started", Empty)
 
     limb_l = 'left'
-    limb_r = 'right'
     hover_distance = 0.15  # meters
 
     # An orientation for gripper fingers to be overhead and parallel to the obj
@@ -189,7 +188,7 @@ def main():
     starting_pose = Pose(
         position=Point(x=0.7, y=0.135, z=0.35),
         orientation=overhead_orientation)
-    pnp = PickAndPlaceMoveIt(limb_l, hover_distance)
+    pnp = PickAndPlaceMoveIt(limb, hover_distance)
 
     block_poses = list()
     # The Pose of the block in its initial location.
