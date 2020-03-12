@@ -88,7 +88,7 @@ class PickAndPlaceMoveIt(object):
 
         # servo up from current pose
         self._group.set_pose_target(ik_pose)
-        plan = self._grosrun lab4_pkg pick_and_plave_moveit.pyroup.plan()
+        plan self._grosrun.chess_baxter.pick_and_plave_moveit.pyroup.plan()
         self._group.execute(plan)
 
     def _servo_to_pose(self, pose):
