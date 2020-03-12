@@ -177,21 +177,27 @@ def main():
     # Wait for the All Clear from emulator startup
     rospy.wait_for_message("/robot/sim/started", Empty)
 
-    limb_l = 'left'
+    limb = 'left' 
     hover_distance = 0.15  # meters
+
+
 
     # An orientation for gripper fingers to be overhead and parallel to the obj
     overhead_orientation = Quaternion(x=-0.0249590815779, y=0.999649402929, z=0.00737916180073, w=0.00486450832011)
     # NOTE: Gazebo and Rviz has different origins, even though they are connected. For this
     # we need to compensate for this offset which is 0.93 from the ground in gazebo to
     # the actual 0, 0, 0 in Rviz.
+    
+    
     starting_pose = Pose(
         position=Point(x=0.7, y=0.135, z=0.35),
         orientation=overhead_orientation)
-    pnp = PickAndPlaceMoveIt(limb_l, hover_distance)
-    #pnp = PickAndPlaceMoveIt(limb_r, hover_distance)
+    pnp = PickAndPlaceMoveIt(limb, hover_distance)
 
+    
     block_poses = list()
+    
+    
     # The Pose of the block in its initial location.
     # You may wish to replace these poses with estimates
     # from a perception node.
@@ -200,16 +206,24 @@ def main():
     # to command MoveIt! to go below because the table is 74 cm height.
     # Since the offset is 0.93, we just simply need to substract
     # 0.74 - 0.93 = -0.15 in Z
+    
+    
     block_poses.append(Pose(
-        position=Point(x=0.68, y=0.135, z=-0.14),
+        position=Point(x=0.637, y=0.425, z=-0.122),
         orientation=overhead_orientation))
+    
+    
     # Feel free to add additional desired poses for the object.
     # Each additional pose will get its own pick and place.
+    
+    
     block_poses.append(Pose(
-        position=Point(x=0.68, y=-0.135, z=-0.14),
+        position=Point(x=0.637, y=0.485, z=-0.122),
         orientation=overhead_orientation))
 
     # Move to the desired starting angles
+    
+    
     pnp.move_to_start(starting_pose)
     idx = 0
     while not rospy.is_shutdown():

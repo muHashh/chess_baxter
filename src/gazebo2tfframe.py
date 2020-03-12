@@ -8,7 +8,9 @@ from geometry_msgs.msg import *
 from copy import deepcopy
 
 # This is hard-coded to block for this exercise, yet you can make the script general by adding cmd line arguments
-input_linkname = 'r7'
+
+
+
 
 # Global variable where the object's pose is stored
 pose = None
@@ -51,4 +53,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    for name in rospy.get_param('piece_names'):
+        input_linkname = name
+        main()
