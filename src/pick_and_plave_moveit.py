@@ -190,6 +190,7 @@ def main():
         position=Point(x=0.7, y=0.135, z=0.35),
         orientation=overhead_orientation)
     pnp = PickAndPlaceMoveIt(limb_l, hover_distance)
+    #pnp = PickAndPlaceMoveIt(limb_r, hover_distance)
 
     block_poses = list()
     # The Pose of the block in its initial location.
@@ -201,12 +202,12 @@ def main():
     # Since the offset is 0.93, we just simply need to substract
     # 0.74 - 0.93 = -0.15 in Z
     block_poses.append(Pose(
-        position=Point(x=0.7, y=0.135, z=-0.14),
+        position=Point(x=0.68, y=0.135, z=-0.14),
         orientation=overhead_orientation))
     # Feel free to add additional desired poses for the object.
     # Each additional pose will get its own pick and place.
     block_poses.append(Pose(
-        position=Point(x=0.7, y=-0.135, z=-0.14),
+        position=Point(x=0.68, y=-0.135, z=-0.14),
         orientation=overhead_orientation))
 
     # Move to the desired starting angles
