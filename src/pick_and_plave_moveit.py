@@ -177,7 +177,8 @@ def main():
     # Wait for the All Clear from emulator startup
     rospy.wait_for_message("/robot/sim/started", Empty)
 
-    limb = 'left'
+    limb_l = 'left'
+    limb_r = 'right'
     hover_distance = 0.15  # meters
 
     # An orientation for gripper fingers to be overhead and parallel to the obj
