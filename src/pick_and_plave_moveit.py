@@ -189,7 +189,7 @@ def main():
     starting_pose = Pose(
         position=Point(x=0.7, y=0.135, z=0.35),
         orientation=overhead_orientation)
-    pnp = PickAndPlaceMoveIt(limb, hover_distance)
+    pnp = PickAndPlaceMoveIt(limb_l, hover_distance)
 
     block_poses = list()
     # The Pose of the block in its initial location.
