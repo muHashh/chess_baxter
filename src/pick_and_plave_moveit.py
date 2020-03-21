@@ -206,32 +206,68 @@ def main():
     # to command MoveIt! to go below because the table is 74 cm height.
     # Since the offset is 0.93, we just simply need to substract
     # 0.74 - 0.93 = -0.15 in Z
-    
-    
+
+    #K2
     block_poses.append(Pose(
-        position=Point(x=0.637, y=0.425, z=-0.122),
+        position=Point(x=0.524, y=0.174, z=-0.122),
         orientation=overhead_orientation))
-    
+
+    block_poses.append(Pose(
+        position=Point(x=0.417, y=0.305, z=-0.122),
+        orientation=overhead_orientation))
+
+    #K6
+    block_poses.append(Pose(
+        position=Point(x=0.666, y=0.375, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.836, y=0.230, z=-0.122),
+        orientation=overhead_orientation))
+
+    #r7
+    block_poses.append(Pose(
+        position=Point(x=0.417, y=0.425, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.417, y=0.495, z=-0.122),
+        orientation=overhead_orientation))
+
+    #R7
+    block_poses.append(Pose(
+        position=Point(x=0.774, y=0.425, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.836, y=0.495, z=-0.122),
+        orientation=overhead_orientation))
+
+    #R0
+    block_poses.append(Pose(
+        position=Point(x=0.736, y=0.068, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.836, y=0.068, z=-0.122),
+        orientation=overhead_orientation))
     
     # Feel free to add additional desired poses for the object.
     # Each additional pose will get its own pick and place.
-    
-    
-    block_poses.append(Pose(
-        position=Point(x=0.637, y=0.485, z=-0.122),
-        orientation=overhead_orientation))
 
     # Move to the desired starting angles
     
     
     pnp.move_to_start(starting_pose)
     idx = 0
-    while not rospy.is_shutdown():
+    while not rospy.is_shutdown() and idx<len(block_poses):
         print("\nPicking...")
         pnp.pick(block_poses[idx])
         print("\nPlacing...")
-        idx = (idx+1) % len(block_poses)
+        idx = idx+1
         pnp.place(block_poses[idx])
+        idx = idx +1
+        pnp.move_to_start(starting_pose)
     return 0
 
 
