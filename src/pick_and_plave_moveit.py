@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import sys
 import copy
-
 import rospy
 import rospkg
+import tf
 
 from std_msgs.msg import (
     Empty,
@@ -22,7 +22,9 @@ from gazebo_msgs.srv import (
 
 import baxter_interface
 import moveit_commander
+import gazebo2tfframe as gazebotf
 
+from collections import OrderedDict
 
 class PickAndPlaceMoveIt(object):
     def __init__(self, limb, hover_distance=0.15, verbose=True):
@@ -165,111 +167,90 @@ def delete_gazebo_models():
 
 def main():
     moveit_commander.roscpp_initialize(sys.argv)
-    rospy.init_node("ik_pick_and_place_moveit")
+    #--------------------------------?
+    # rospy.init_node("ik_pick_and_place_moveit")
 
-    # Load Gazebo Models via Spawning Services
-    # Note that the models reference is the /world frame
-    # and the IK operates with respect to the /base frame
-    #load_gazebo_models()
-    # Remove models from the scene on shutdown
-    rospy.on_shutdown(delete_gazebo_models)
+    # # Load Gazebo Models via Spawning Services
+    # # Note that the models reference is the /world frame
+    # # and the IK operates with respect to the /base frame
+    # # Remove models from the scene on shutdown
+    # rospy.on_shutdown(delete_gazebo_models)
 
-    # Wait for the All Clear from emulator startup
-    rospy.wait_for_message("/robot/sim/started", Empty)
-
-    limb = 'left' 
-    hover_distance = 0.15  # meters
-
-
-
-    # An orientation for gripper fingers to be overhead and parallel to the obj
-    overhead_orientation = Quaternion(x=-0.0249590815779, y=0.999649402929, z=0.00737916180073, w=0.00486450832011)
+    # # Wait for the All Clear from emulator startup
+    # rospy.wait_for_message("/robot/sim/started", Empty)
+    #--------------------------------
     # NOTE: Gazebo and Rviz has different origins, even though they are connected. For this
     # we need to compensate for this offset which is 0.93 from the ground in gazebo to
     # the actual 0, 0, 0 in Rviz.
-    
-    
+    #--------------------------------
+    limb = 'left' 
+    hover_distance = 0.15  # meters
+
+    # An orientation for gripper fingers to be overhead and parallel to the obj
+    overhead_orientation = Quaternion(x=-0.0249590815779, y=0.999649402929, z=0.00737916180073, w=0.00486450832011)
+
     starting_pose = Pose(
-        position=Point(x=0.7, y=0.135, z=0.35),
-        orientation=overhead_orientation)
+    position=Point(x=0.7, y=0.135, z=0.35),
+    orientation=overhead_orientation)
+
+    block_pick_poses = list()
+    block_place_poses = list()
+
+# ---------------PICKING    
+    for piece in rospy.get_param('piece_names'):
+        gazebotf.input_linkname = piece
+        # Global variable where the object's pose is stored
+        gazebotf.pose = None
+        gazebotf.main()
+        current_pose = gazebotf.pose.position
+        block_pick_poses.append(Pose(
+            position=current_pose,
+            orientation=overhead_orientation))
+
+        # print(piece)
+        # print(current_pose)
+
+# ---------------PLACING
+    orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
+    board_pose = Pose(Point(0.3,0.55,0.78), orient)
+    frame_dist = 0.025
+    origin_piece = 0.03125
+
+    block_desired_sq = {}
+    block_desired_sq['k2'] = '0-3'
+    block_desired_sq['r0'] = '0-7'
+    block_desired_sq['r7'] = '0-0'
+    block_desired_sq['K6'] = '7-3'
+    block_desired_sq['R0'] = '7-7'
+    block_desired_sq['R7'] = '7-0'
+
+    block_desired_sq = OrderedDict(sorted(block_desired_sq.items()))
+    for key, value in block_desired_sq.items():
+        pose = copy.deepcopy(board_pose)
+        row = value.split('-')[0]
+        pose.position.x = board_pose.position.x + frame_dist + origin_piece + int(row) * (2 * origin_piece)
+        col = value.split('-')[1]
+        pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + int(col) * (2 * origin_piece)
+        pose.position.z += 0.018
+        pose.position.z -= 0.93
+
+        pose.orientation = overhead_orientation
+        block_place_poses.append(pose)
+
+        # print(pose.position.x, pose.position.y, pose.position.z)
+
     pnp = PickAndPlaceMoveIt(limb, hover_distance)
-
-    
-    block_poses = list()
-    
-    
-    # The Pose of the block in its initial location.
-    # You may wish to replace these poses with estimates
-    # from a perception node.
-
-    # NOTE: Remember that there's an offset in Rviz wrt Gazebo. We need
-    # to command MoveIt! to go below because the table is 74 cm height.
-    # Since the offset is 0.93, we just simply need to substract
-    # 0.74 - 0.93 = -0.15 in Z
-
-    #K2
-    block_poses.append(Pose(
-        position=Point(x=0.524, y=0.174, z=-0.122),
-        orientation=overhead_orientation))
-
-    block_poses.append(Pose(
-        position=Point(x=0.417, y=0.305, z=-0.122),
-        orientation=overhead_orientation))
-
-    #K6
-    block_poses.append(Pose(
-        position=Point(x=0.666, y=0.375, z=-0.122),
-        orientation=overhead_orientation))
-
-    block_poses.append(Pose(
-        position=Point(x=0.836, y=0.230, z=-0.122),
-        orientation=overhead_orientation))
-
-    #r7
-    block_poses.append(Pose(
-        position=Point(x=0.417, y=0.425, z=-0.122),
-        orientation=overhead_orientation))
-
-    block_poses.append(Pose(
-        position=Point(x=0.417, y=0.495, z=-0.122),
-        orientation=overhead_orientation))
-
-    #R7
-    block_poses.append(Pose(
-        position=Point(x=0.774, y=0.425, z=-0.122),
-        orientation=overhead_orientation))
-
-    block_poses.append(Pose(
-        position=Point(x=0.836, y=0.495, z=-0.122),
-        orientation=overhead_orientation))
-
-    #R0
-    block_poses.append(Pose(
-        position=Point(x=0.736, y=0.068, z=-0.122),
-        orientation=overhead_orientation))
-
-    block_poses.append(Pose(
-        position=Point(x=0.836, y=0.068, z=-0.122),
-        orientation=overhead_orientation))
-    
-    # Feel free to add additional desired poses for the object.
-    # Each additional pose will get its own pick and place.
-
-    # Move to the desired starting angles
-    
-    
     pnp.move_to_start(starting_pose)
+
     idx = 0
-    while not rospy.is_shutdown() and idx<len(block_poses):
+    while not rospy.is_shutdown() and idx<len(block_pick_poses):
         print("\nPicking...")
-        pnp.pick(block_poses[idx])
+        pnp.pick(block_pick_poses[idx])
         print("\nPlacing...")
-        idx = idx+1
-        pnp.place(block_poses[idx])
+        pnp.place(block_place_poses[idx])
         idx = idx +1
-        pnp.move_to_start(starting_pose)
     return 0
 
 
-if __name__ == '__main__':
+if __name__ == '__main__': 
     sys.exit(main())

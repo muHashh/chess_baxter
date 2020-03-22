@@ -7,15 +7,6 @@ from gazebo_msgs.srv import *
 from geometry_msgs.msg import *
 from copy import deepcopy
 
-# This is hard-coded to block for this exercise, yet you can make the script general by adding cmd line arguments
-
-
-
-
-# Global variable where the object's pose is stored
-pose = None
-
-
 def get_links_gazebo(link_states_msg):
     # Call back to retrieve the object you are interested in
     global input_linkname
@@ -28,7 +19,6 @@ def get_links_gazebo(link_states_msg):
 
     pose = poses[input_linkname]
 
-
 def main():
     rospy.init_node('gazebo2tfframe')
 
@@ -36,23 +26,18 @@ def main():
     tfBroadcaster = tf.TransformBroadcaster()
     # SUbscribe to Gazebo's topic where all links and objects poses within the simulation are published
     rospy.Subscriber('gazebo/link_states', LinkStates, get_links_gazebo)
-
-    rospy.loginfo('Spinning')
+    
     global pose
-    rate = rospy.Rate(20)
-    while not rospy.is_shutdown():
+    i = 0
+    while not rospy.is_shutdown() and i<1:
         if pose is not None:
             pos = pose.position
             ori = pose.orientation
-            rospy.loginfo(pos)
+            pose.position.z -= 0.93
+            i = i + 1
             # Publish transformation given in pose
             tfBroadcaster.sendTransform((pos.x, pos.y, pos.z - 0.93), (ori.x, ori.y, ori.z, ori.w), rospy.Time.now(), input_linkname, 'world')
-            rate.sleep()
-
-    rospy.spin()
 
 
 if __name__ == '__main__':
-    for name in rospy.get_param('piece_names'):
-        input_linkname = name
-        main()
+    main()
