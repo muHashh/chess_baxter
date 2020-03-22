@@ -172,7 +172,7 @@ def main():
     # and the IK operates with respect to the /base frame
     #load_gazebo_models()
     # Remove models from the scene on shutdown
-    rospy.on_shutdown(delete_gazebo_models)
+    #rospy.on_shutdown(delete_gazebo_models)
 
     # Wait for the All Clear from emulator startup
     rospy.wait_for_message("/robot/sim/started", Empty)
@@ -207,6 +207,15 @@ def main():
     # Since the offset is 0.93, we just simply need to substract
     # 0.74 - 0.93 = -0.15 in Z
 
+    #r0
+    block_poses.append(Pose(
+        position=Point(x=0.414, y=0.047, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.417, y=0.047, z=-0.122),
+        orientation=overhead_orientation))
+
     #K2
     block_poses.append(Pose(
         position=Point(x=0.524, y=0.174, z=-0.122),
@@ -222,7 +231,7 @@ def main():
         orientation=overhead_orientation))
 
     block_poses.append(Pose(
-        position=Point(x=0.836, y=0.230, z=-0.122),
+        position=Point(x=0.846, y=0.240, z=-0.122),
         orientation=overhead_orientation))
 
     #r7
@@ -251,6 +260,33 @@ def main():
     block_poses.append(Pose(
         position=Point(x=0.836, y=0.068, z=-0.122),
         orientation=overhead_orientation))
+
+    #First valid move rook r7
+    block_poses.append(Pose(
+        position=Point(x=0.417, y=0.495, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.577, y=0.495, z=-0.122),
+        orientation=overhead_orientation))    
+
+    #Second valid move king K6
+    block_poses.append(Pose(
+        position=Point(x=0.846, y=0.240, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.790, y=0.300, z=-0.122),
+        orientation=overhead_orientation))
+
+    #Third valid move rook r7
+    block_poses.append(Pose(
+        position=Point(x=0.577, y=0.495, z=-0.122),
+        orientation=overhead_orientation))
+
+    block_poses.append(Pose(
+        position=Point(x=0.577, y=0.300, z=-0.122),
+        orientation=overhead_orientation))         
     
     # Feel free to add additional desired poses for the object.
     # Each additional pose will get its own pick and place.
