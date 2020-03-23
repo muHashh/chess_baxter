@@ -181,7 +181,7 @@ def get_pick_pos(b_wanted, orientation, pick_poses=[]):
 
 def get_place_pos(b_wanted, p_wanted, orientation, place_poses=[]):
     orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
-    board_pose = Pose(Point(0.32,0.55,0.78), orient)
+    board_pose = Pose(Point(0.3,0.55,0.78), orient)
     frame_dist = 0.025
     origin_piece = 0.03125
 
@@ -245,8 +245,8 @@ def main():
     # block_pick_poses = get_pick_pos(blocks_wanted, overhead_orientation)
     # block_place_poses = get_place_pos(blocks_wanted, pos_wanted, overhead_orientation)
 
-    blocks_wanted = ['R0', 'r7', 'K2']
-    pos_wanted = ['7-5', '4-0', '1-4']
+    blocks_wanted = ['R0','r7','R7']
+    pos_wanted = ['4-0','7-5','3-7']
     block_pick_poses = get_pick_pos(blocks_wanted, overhead_orientation)
     block_place_poses = get_place_pos(blocks_wanted, pos_wanted, overhead_orientation)
 

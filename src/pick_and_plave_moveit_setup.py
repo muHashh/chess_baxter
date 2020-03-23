@@ -165,8 +165,8 @@ def delete_gazebo_models():
         rospy.loginfo("Delete Model service call failed: {0}".format(e))
 
 
-def get_pick_pos(pick_poses, orientation, wanted):
-    for piece in wanted:
+def get_pick_pos(b_wanted, orientation, pick_poses=[]):
+    for piece in b_wanted:
         gazebotf.input_linkname = piece
         # Global variable where the object's pose is stored
         gazebotf.pose = None
@@ -179,19 +179,18 @@ def get_pick_pos(pick_poses, orientation, wanted):
     return pick_poses
 
 
-def get_place_pos(place_poses, orientation):
+def get_place_pos(b_wanted, p_wanted, orientation, place_poses=[]):
     orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
     board_pose = Pose(Point(0.3,0.55,0.78), orient)
     frame_dist = 0.025
     origin_piece = 0.03125
 
     block_desired_sq = {}
-    block_desired_sq['k2'] = '7-3'
-    block_desired_sq['r0'] = '7-7'
-    block_desired_sq['r7'] = '7-0'
-    block_desired_sq['K6'] = '0-3'
-    block_desired_sq['R0'] = '0-7'
-    block_desired_sq['R7'] = '0-0'
+    for block, pos in zip(b_wanted, p_wanted):
+        block_desired_sq[block] = pos
+        
+    # for i in len(b_wanted):
+    #     block_desired_sq[b_wanted[i]] = p_wanted[i]
 
     block_desired_sq = OrderedDict(sorted(block_desired_sq.items()))
     for key, value in block_desired_sq.items():
@@ -227,11 +226,12 @@ def main():
     # we need to compensate for this offset which is 0.93 from the ground in gazebo to
     # the actual 0, 0, 0 in Rviz.
     #--------------------------------
-    limb = 'left' 
-    hover_distance = 0.15  # meters
 
     # An orientation for gripper fingers to be overhead and parallel to the obj
     overhead_orientation = Quaternion(x=-0.0249590815779, y=0.999649402929, z=0.00737916180073, w=0.00486450832011)
+
+    limb = 'left' 
+    hover_distance = 0.15  # meters
 
     starting_pose = Pose(
     position=Point(x=0.7, y=0.135, z=0.35),
@@ -240,41 +240,29 @@ def main():
     block_pick_poses = list()
     block_place_poses = list()
 
-# ---------------PICKING
-    block_pick_poses = get_pick_pos(block_pick_poses, overhead_orientation)
-    # returns current positions of all cubes
-# ---------------PLACING
-    block_place_poses = get_place_pos(block_place_poses, overhead_orientation)
-    # returns positions where each cube will be placed
-# ---------------MOVING
-    block_moves = {}
-    block_moves['r0'] = '5-7'
-    block_moves['R0'] = '2-7'
-    block_moves['k2'] = '6-4'
+    blocks_wanted = rospy.get_param('piece_names')
+    pos_wanted = ['7-3', '7-0', '7-7', '0-3', '0-0', '0-7']
+    block_pick_poses = get_pick_pos(blocks_wanted, overhead_orientation)
+    block_place_poses = get_place_pos(blocks_wanted, pos_wanted, overhead_orientation)
+
+    # blocks_wanted = ['R0','r7','R7']
+    # pos_wanted = ['4-0','7-5','3-7']
+    # block_pick_poses = get_pick_pos(blocks_wanted, overhead_orientation)
+    # block_place_poses = get_place_pos(blocks_wanted, pos_wanted, overhead_orientation)
 
     pnp = PickAndPlaceMoveIt(limb, hover_distance)
     pnp.move_to_start(starting_pose)
-    pnp.move_to_start(starting_pose)
-    pnp.move_to_start(starting_pose)
-    pnp.move_to_start(starting_pose)
-    
-    while not rospy.is_shutdown():
-        idx = 0
-        blocks_wanted = rospy.get_param('piece_names')
-        while idx<len(block_pick_poses):
-            rospy.sleep(2.0)
-            print("\nPicking...")
-            pnp.pick(block_pick_poses[idx])
-            print("\nPlacing...")
-            pnp.place(block_place_poses[idx])
-            idx = idx +1
-            pnp.move_to_start(starting_pose)
-
-        mv = 0
-        blocks_wanted = ['r0', 'R0', 'k2']    
-        while mv<size()
+    idx = 0
+    while not rospy.is_shutdown() and idx<len(block_pick_poses):
+        print("\nPicking...")
+        pnp.pick(block_pick_poses[idx])
+        print("\nPlacing...")
+        pnp.place(block_place_poses[idx])
+        idx = idx + 1
+        pnp.move_to_start(starting_pose)
+        
     return 0
 
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     sys.exit(main())

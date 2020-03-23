@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     # ChessBoard
     orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
-    board_pose = Pose(Point(0.32,0.55,0.78), orient)
+    board_pose = Pose(Point(0.3,0.55,0.78), orient)
     frame_dist = 0.025
     model_path = rospkg.RosPack().get_path('chess_baxter')+"/models/"
     
@@ -48,8 +48,7 @@ if __name__ == '__main__':
             pieces_xml[each] = f.read().replace('\n', '')
 
     # board_setup = ['rnbqkbnr', 'pppppppp', '', '', '', '', 'PPPPPPPP', 'RNBQKBNR']
-    # board_setup = ['', '', '**k*****', 'r******r', '', '******K*', 'R******R', '']
-    board_setup = ['r*k****r', '', '', '', '', '', '', 'R*K****R']
+    board_setup = ['', '', '**k*****', 'r******r', '', '******K*', 'R******R', '']
 
     piece_positionmap = dict()
     piece_names = []
