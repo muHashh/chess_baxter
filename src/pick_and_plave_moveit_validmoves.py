@@ -65,7 +65,7 @@ class PickAndPlaceMoveIt(object):
 
     def gripper_close(self):
         self._gripper.close()
-        rospy.sleep(1.0)
+        rospy.sleep(2.0)
 
     def _approach(self, pose):
         approach = copy.deepcopy(pose)
@@ -185,21 +185,20 @@ def get_place_pos(b_wanted, p_wanted, orientation, place_poses=[]):
     frame_dist = 0.025
     origin_piece = 0.03125
 
-    block_desired_sq = {}
-    for block, pos in zip(b_wanted, p_wanted):
-        block_desired_sq[block] = pos
+    block_desired_sq = []
         
-    # for i in len(b_wanted):
-    #     block_desired_sq[b_wanted[i]] = p_wanted[i]
+    for i in range(len(b_wanted)):
+        block_desired_sq.append((b_wanted[i], p_wanted[i]))
 
-    block_desired_sq = OrderedDict(sorted(block_desired_sq.items()))
-    for key, value in block_desired_sq.items():
+    # block_desired_sq = OrderedDict(sorted(block_desired_sq.items()))
+    # items_preserved_order = list(block_desired_sq.items())
+    for pair in block_desired_sq:
         pose = copy.deepcopy(board_pose)
-        row = value.split('-')[0]
+        row = pair[1].split('-')[0]
         pose.position.x = board_pose.position.x + frame_dist + origin_piece + int(row) * (2 * origin_piece)
-        col = value.split('-')[1]
+        col = pair[1].split('-')[1]
         pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + int(col) * (2 * origin_piece)
-        pose.position.z += 0.018
+        pose.position.z += 0.05
         pose.position.z -= 0.93
 
         pose.orientation = orientation
@@ -231,22 +230,19 @@ def main():
     overhead_orientation = Quaternion(x=-0.0249590815779, y=0.999649402929, z=0.00737916180073, w=0.00486450832011)
 
     limb = 'left' 
-    hover_distance = 0.15  # meters
+    hover_distance = 0.17  # meters
 
     starting_pose = Pose(
     position=Point(x=0.7, y=0.135, z=0.35),
     orientation=overhead_orientation)
-
-    block_pick_poses = list()
-    block_place_poses = list()
 
     # blocks_wanted = rospy.get_param('piece_names')
     # pos_wanted = ['7-3', '7-0', '7-7', '0-3', '0-0', '0-7']
     # block_pick_poses = get_pick_pos(blocks_wanted, overhead_orientation)
     # block_place_poses = get_place_pos(blocks_wanted, pos_wanted, overhead_orientation)
 
-    blocks_wanted = ['R0','r7','R7']
-    pos_wanted = ['4-0','7-5','3-7']
+    blocks_wanted = ['r0','R7','r7']
+    pos_wanted = ['4-0','3-7','5-7']
     block_pick_poses = get_pick_pos(blocks_wanted, overhead_orientation)
     block_place_poses = get_place_pos(blocks_wanted, pos_wanted, overhead_orientation)
 
