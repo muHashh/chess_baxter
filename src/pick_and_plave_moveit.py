@@ -165,6 +165,50 @@ def delete_gazebo_models():
         rospy.loginfo("Delete Model service call failed: {0}".format(e))
 
 
+def get_pick_pos(pick_poses, orientation, wanted):
+    for piece in wanted:
+        gazebotf.input_linkname = piece
+        # Global variable where the object's pose is stored
+        gazebotf.pose = None
+        gazebotf.main()
+        current_pose = gazebotf.pose.position
+        pick_poses.append(Pose(
+            position=current_pose,
+            orientation=orientation))
+
+    return pick_poses
+
+
+def get_place_pos(place_poses, orientation):
+    orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
+    board_pose = Pose(Point(0.3,0.55,0.78), orient)
+    frame_dist = 0.025
+    origin_piece = 0.03125
+
+    block_desired_sq = {}
+    block_desired_sq['k2'] = '7-3'
+    block_desired_sq['r0'] = '7-0'
+    block_desired_sq['r7'] = '7-7'
+    block_desired_sq['K6'] = '0-3'
+    block_desired_sq['R0'] = '0-0'
+    block_desired_sq['R7'] = '0-7'
+
+    block_desired_sq = OrderedDict(sorted(block_desired_sq.items()))
+    for key, value in block_desired_sq.items():
+        pose = copy.deepcopy(board_pose)
+        row = value.split('-')[0]
+        pose.position.x = board_pose.position.x + frame_dist + origin_piece + int(row) * (2 * origin_piece)
+        col = value.split('-')[1]
+        pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + int(col) * (2 * origin_piece)
+        pose.position.z += 0.018
+        pose.position.z -= 0.93
+
+        pose.orientation = orientation
+        place_poses.append(pose)
+
+    return place_poses
+
+
 def main():
     moveit_commander.roscpp_initialize(sys.argv)
     #--------------------------------?
@@ -196,59 +240,39 @@ def main():
     block_pick_poses = list()
     block_place_poses = list()
 
-# ---------------PICKING    
-    for piece in rospy.get_param('piece_names'):
-        gazebotf.input_linkname = piece
-        # Global variable where the object's pose is stored
-        gazebotf.pose = None
-        gazebotf.main()
-        current_pose = gazebotf.pose.position
-        block_pick_poses.append(Pose(
-            position=current_pose,
-            orientation=overhead_orientation))
-
-        # print(piece)
-        # print(current_pose)
-
+# ---------------PICKING
+    # returns current positions of all cubes
 # ---------------PLACING
-    orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
-    board_pose = Pose(Point(0.3,0.55,0.78), orient)
-    frame_dist = 0.025
-    origin_piece = 0.03125
-
-    block_desired_sq = {}
-    block_desired_sq['k2'] = '0-3'
-    block_desired_sq['r0'] = '0-7'
-    block_desired_sq['r7'] = '0-0'
-    block_desired_sq['K6'] = '7-3'
-    block_desired_sq['R0'] = '7-7'
-    block_desired_sq['R7'] = '7-0'
-
-    block_desired_sq = OrderedDict(sorted(block_desired_sq.items()))
-    for key, value in block_desired_sq.items():
-        pose = copy.deepcopy(board_pose)
-        row = value.split('-')[0]
-        pose.position.x = board_pose.position.x + frame_dist + origin_piece + int(row) * (2 * origin_piece)
-        col = value.split('-')[1]
-        pose.position.y = board_pose.position.y - 0.55 + frame_dist + origin_piece + int(col) * (2 * origin_piece)
-        pose.position.z += 0.018
-        pose.position.z -= 0.93
-
-        pose.orientation = overhead_orientation
-        block_place_poses.append(pose)
-
-        # print(pose.position.x, pose.position.y, pose.position.z)
+    # returns positions where each cube will be placed
+# ---------------MOVING
+    block_moves = {}
+    block_moves['r0'] = '5-7'
+    block_moves['R0'] = '2-7'
+    block_moves['k2'] = '6-4'
 
     pnp = PickAndPlaceMoveIt(limb, hover_distance)
     pnp.move_to_start(starting_pose)
+    pnp.move_to_start(starting_pose)
+    pnp.move_to_start(starting_pose)
+    pnp.move_to_start(starting_pose)
+    
+    while not rospy.is_shutdown():
+        idx = 0
+        blocks_wanted = rospy.get_param('piece_names')
+        block_pick_poses = get_pick_pos(block_pick_poses, overhead_orientation)
+        block_place_poses = get_place_pos(block_place_poses, overhead_orientation)
+        while idx<len(block_pick_poses):
+            rospy.sleep(2.0)
+            print("\nPicking...")
+            pnp.pick(block_pick_poses[idx])
+            print("\nPlacing...")
+            pnp.place(block_place_poses[idx])
+            idx = idx +1
+            pnp.move_to_start(starting_pose)
 
-    idx = 0
-    while not rospy.is_shutdown() and idx<len(block_pick_poses):
-        print("\nPicking...")
-        pnp.pick(block_pick_poses[idx])
-        print("\nPlacing...")
-        pnp.place(block_place_poses[idx])
-        idx = idx +1
+        mv = 0
+        blocks_wanted = ['r0', 'R0', 'k2']    
+        while mv<size()
     return 0
 
 

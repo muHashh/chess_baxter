@@ -18,7 +18,7 @@ if __name__ == '__main__':
     with open(model_path + "cafe_table/model.sdf", "r") as table_file:
         table_xml = table_file.read().replace('\n', '')
 
-    table_pose=Pose(position=Point(x=0.73, y=0.4, z=0.0))
+    table_pose=Pose(position=Point(x=0.73, y=0.1, z=0.0))
     try:
         spawn_sdf = rospy.ServiceProxy('/gazebo/spawn_sdf_model', SpawnModel)
         spawn_sdf("cafe_table", table_xml, "/", table_pose, "world")
